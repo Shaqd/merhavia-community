@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.env
+*.log
+.DS_Store
+
+# Paybox reports hold every member's phone number: never commit them
+*.xlsx
+*.xls
+*.csv
