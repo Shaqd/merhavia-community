@@ -1,0 +1,4 @@
+@import 'tailwindcss';
+
+/* Shared components live outside this app, so Tailwind has to scan them too. */
+@source '../../../../packages/ui/src';

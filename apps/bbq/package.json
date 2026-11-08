@@ -1,0 +1,22 @@
+{
+  "name": "@merhavia/bbq",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "types": "wrangler types",
+    "typecheck": "wrangler types && tsc -p tsconfig.app.json && tsc -p tsconfig.worker.json && tsc -p tsconfig.test.json && tsc -p tsconfig.node.json",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local --persist-to ../../.wrangler/state",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@merhavia/ui": "*",
+    "hono": "^4.13.17",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

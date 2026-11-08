@@ -1,0 +1,25 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "merhavia-hub",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": {
+    // The React app is served for every path except /api, which the Worker handles.
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      // One database shared by every app (docs/DESIGN.md §3). Replace the placeholder id with the
+      // real one in every app's wrangler.jsonc after `wrangler d1 create merhavia-community`.
+      "database_name": "merhavia-community",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+      // Each app tracks its own migrations, so the hub's and the BBQ app's never collide.
+      "migrations_table": "hub_migrations"
+    }
+  ]
+}

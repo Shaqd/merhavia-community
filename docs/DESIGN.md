@@ -1,6 +1,6 @@
 # Merhavia community apps — design
 
-Status: design agreed, nothing built yet (2026-11-06).
+Status: design agreed (2026-11-06). M0 foundations in progress (2026-11-07); see §13.
 Owner: Eldad Dahan (personal project, GitHub `Shaqd`). No employer accounts, keys, cloud projects
 or budgets are used anywhere in this repo.
 
@@ -92,8 +92,9 @@ then a **football predictions app** (major national-team tournaments) later.
 | Routing | Hono |
 | Data access | Plain SQL in repository modules + schema validation of inputs. No heavy ORM |
 | Layering | controller → service → repository, explicit types, nothing clever |
-| Tests | Vitest running inside the Workers runtime |
-| Local dev | `wrangler dev` with a local D1 copy. No cloud account needed |
+| Tests | Vitest running inside the Workers runtime (`@cloudflare/vitest-plugin`) |
+| Local dev | Vite with Cloudflare's Vite plugin, which runs each Worker in the real Workers runtime. All apps share one local D1 copy. No cloud account needed |
+| Language version | TypeScript 6.0. typescript-eslint does not support TypeScript 7 yet (checked 2026-11-07) |
 | Email | Resend free plan: 3,000 emails/month, 100/day, one sending domain |
 | AI | Claude API on a personal Anthropic account. The key is a Cloudflare secret, never in the repo |
 
@@ -253,9 +254,10 @@ BBQ:
 ```
 apps/hub/        Worker + React, migrations/ (hub_ tables)
 apps/bbq/        Worker + React, migrations/ (bbq_ tables)
-packages/auth/   session check + cookie helpers used by every app
+packages/auth/   session check + cookie helpers used by every app (arrives in M1)
 packages/ui/     shared RTL components: header, app switcher, form controls
-docs/            this file
+scripts/         repo checks, e.g. the cross-app table-write check
+docs/            this file, DEPLOY.md
 .github/workflows/
 ```
 
@@ -263,11 +265,13 @@ The repo uses npm workspaces. The football app joins later as `apps/football/`.
 
 ## 10. CI/CD (GitHub Actions)
 
-- **On every PR:** type check, lint, tests, and the cross-app table-write check. Merging requires green checks.
+- **On every PR:** type check, lint, tests, the cross-app table-write check, and a build.
+  GitHub Free can't make a private repo require green checks before merging (branch protection
+  needs Pro), so the deploy re-runs the checks and a red `main` never deploys.
 - **On merge to `main`:**
   1. The checks run again.
-  2. D1 migrations are applied.
-  3. Only apps whose files changed are deployed, using path filters.
+  2. D1 migrations are applied, the hub's first.
+  3. Only apps whose files changed are deployed. A change outside `apps/` deploys every app.
 - **Manual deploy button:** `workflow_dispatch`.
 - **Optional:** a preview URL per PR.
 - **Secrets:** a Cloudflare API token, scoped to Workers and D1, stored as a GitHub secret.
@@ -313,6 +317,15 @@ Accounts the owner creates, all personal and never the employer's:
 | M3 | Paybox | Browser import, matching, review list, create-user-from-payment, payouts vs purchases, onboarding from history |
 | M4 | Inventory and budget | Durable stock, movements, budget engine, meat suggestion, event history views |
 | M5 | AI | Post-event recommendations; receipt photo → purchase lines |
+
+**M0 progress (2026-11-07):**
+- **Done:** skeleton monorepo, CI, the deploy workflow and local dev.
+- **Shared database, proven locally:** the hub's and the BBQ app's migrations land in one database,
+  each tracked in its own table. Both Workers see the same rows.
+- **Remaining:**
+  - the first real deploy, which also proves the shared database on Cloudflare (needs the account; docs/DEPLOY.md)
+  - in-browser Paybox decryption
+  - one email code (needs the domain and Resend)
 
 ## 14. Open decisions
 
